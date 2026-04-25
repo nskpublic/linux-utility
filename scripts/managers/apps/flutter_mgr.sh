@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ACTION=$1
-DISTRO=$2
+OS_FAMILY=$2
+source "$(dirname "$0")/../../utils.sh"
 
 if [ "$1" = "info" ]; then
     echo 'APP_NAME="Flutter"'
@@ -9,32 +10,26 @@ if [ "$1" = "info" ]; then
 fi
 
 if [ "$ACTION" = "uninstall" ]; then
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
         "arch" )
-            ${AUR_HELPER:-sudo pacman} -Rns --noconfirm flutter-bin
+            remove_package "$OS_FAMILY" flutter-bin
             ;;
-        "debian" )
-            sudo snap remove flutter
-            ;;
-        "fedora" )
+        "debian" | "fedora" )
             sudo snap remove flutter
             ;;
         * )
-            echo "Unsupported distribution: $DISTRO for Flutter uninstallation."
+            echo "Unsupported distribution: $OS_FAMILY for Flutter uninstallation."
             ;;
     esac
 else
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
     "arch" )
-        ${AUR_HELPER:-sudo pacman} -S --noconfirm flutter-bin
+        install_package "$OS_FAMILY" flutter-bin
         ;;
-    "debian" )
-        sudo snap install flutter --classic || echo "Snap not installed or failed, please install Flutter manually"
-        ;;
-    "fedora" )
+    "debian" | "fedora" )
         sudo snap install flutter --classic || echo "Snap not installed or failed, please install Flutter manually"
         ;;
     * )
-        echo "Unsupported distribution: $DISTRO for Flutter."
+        echo "Unsupported distribution: $OS_FAMILY for Flutter."
     esac
 fi

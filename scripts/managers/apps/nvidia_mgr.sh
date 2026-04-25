@@ -18,7 +18,10 @@ fi
 
 if lspci | grep -i -q "nvidia"; then
     echo "NVIDIA hardware detected. Installing open drivers..."
-    install_package "$OS_FAMILY" nvidia-open nvidia-utils egl-wayland
+    if ! install_package "$OS_FAMILY" nvidia-open nvidia-utils egl-wayland; then
+        echo -e "\e[1;31mError: Failed to install NVIDIA drivers. Skipping configuration.\e[0m"
+        exit 1
+    fi
 
     # 1. Update GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub
     GRUB_FILE="/etc/default/grub"

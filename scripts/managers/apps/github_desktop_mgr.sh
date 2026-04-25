@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ACTION=$1
-DISTRO=$2
+OS_FAMILY=$2
+source "$(dirname "$0")/../../utils.sh"
 
 if [ "$1" = "info" ]; then
     echo 'APP_NAME="GitHub Desktop"'
@@ -9,21 +10,21 @@ if [ "$1" = "info" ]; then
 fi
 
 if [ "$ACTION" = "uninstall" ]; then
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
         "arch" )
-            ${AUR_HELPER:-sudo pacman} -Rns --noconfirm github-desktop-bin
+            remove_package "$OS_FAMILY" github-desktop-bin
             ;;
         "debian" | "fedora" )
             echo "Please uninstall GitHub Desktop manually (flatpak uninstall)."
             ;;
         * )
-            echo "Unsupported distribution: $DISTRO"
+            echo "Unsupported distribution: $OS_FAMILY"
             ;;
     esac
 else
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
     "arch" )
-        ${AUR_HELPER:-sudo pacman} -S --noconfirm github-desktop-bin
+        install_package "$OS_FAMILY" github-desktop-bin
         ;;
     "debian" )
         # Flatpak or manual installation
@@ -33,6 +34,6 @@ else
         echo "Please install github desktop via Flatpak or third-party repo on Fedora."
         ;;
     * )
-        echo "Unsupported distribution: $DISTRO"
+        echo "Unsupported distribution: $OS_FAMILY"
     esac
 fi

@@ -18,18 +18,28 @@ fi
 
 case "$OS_FAMILY" in
     "arch" )
-        install_package "$OS_FAMILY" sddm-kcm kvantum-qt6-git tela-circle-icon-theme-git
+        if ! install_package "$OS_FAMILY" sddm-kcm kvantum-qt6-git tela-circle-icon-theme-git; then
+            echo -e "\e[1;31mError: Failed to install KDE theme packages. Skipping custom theme installation.\e[0m"
+            exit 1
+        fi
         ;;
     "debian" )
-        install_package "$OS_FAMILY" sddm-theme-debian kvantum
+        if ! install_package "$OS_FAMILY" sddm-theme-debian kvantum; then
+            echo -e "\e[1;31mError: Failed to install KDE theme packages. Skipping custom theme installation.\e[0m"
+            exit 1
+        fi
         echo "Tela icons must be installed via GitHub script manually on Ubuntu."
         ;;
     "fedora" )
-        install_package "$OS_FAMILY" kvantum sddm
+        if ! install_package "$OS_FAMILY" kvantum sddm; then
+            echo -e "\e[1;31mError: Failed to install KDE theme packages. Skipping custom theme installation.\e[0m"
+            exit 1
+        fi
         echo "Tela icons must be installed via GitHub script manually on Fedora."
         ;;
     * )
         echo "Unsupported distribution: $OS_FAMILY"
+        exit 1
         ;;
 esac
 
@@ -38,11 +48,15 @@ GIT_DIR="$HOME/my/gits"
 mkdir -p "$GIT_DIR"
 ORCHIS_DIR="$GIT_DIR/Orchis-kde"
 if [ ! -d "$ORCHIS_DIR" ]; then
-    git clone https://github.com/vinceliuice/Orchis-kde.git "$ORCHIS_DIR"
+    if ! git clone https://github.com/vinceliuice/Orchis-kde.git "$ORCHIS_DIR"; then
+        echo -e "\e[1;31mError: Failed to clone Orchis KDE theme repository.\e[0m"
+        exit 1
+    fi
 else
     (cd "$ORCHIS_DIR" && git pull)
 fi
+
 (
-    cd "$ORCHIS_DIR" || exit
+    cd "$ORCHIS_DIR" || exit 1
     ./install.sh
 )
