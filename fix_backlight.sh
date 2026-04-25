@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source "$(dirname "$0")/scripts/utils.sh"
+setup_logging
+
 # Overrides for testability
 GRUB_FILE="${GRUB_FILE:-/etc/default/grub}"
 GRUB_UPDATE_CMD="${GRUB_UPDATE_CMD:-grub-mkconfig -o /boot/grub/grub.cfg}"
@@ -12,6 +15,7 @@ AUTO_CONFIRM="${AUTO_CONFIRM:-0}"
 # Check if the script is run with root/sudo privileges (unless skipped for testing)
 if [ "$SKIP_ROOT_CHECK" -ne 1 ] && [ "$EUID" -ne 0 ]; then
   echo "Please run as root or with sudo"
+  cleanup_logging
   exit 1
 fi
 
@@ -43,6 +47,7 @@ execute_fix() {
     echo "Please restart your system to see the changes."
   else
     echo "Operation cancelled."
+    cleanup_logging
     exit 0
   fi
 }
@@ -52,6 +57,7 @@ if grep -Fq "${PARAM_BASE}=" "$GRUB_FILE"; then
   # It exists. Check if it's strictly set to 1
   if grep -Fq "$BACKLIGHT_PARAM" "$GRUB_FILE"; then
     echo "The backlight fix is already correctly applied in $GRUB_FILE."
+    cleanup_logging
     exit 0
   else
     echo "Found existing '${PARAM_BASE}' parameter, but it is not set to 1."
@@ -78,3 +84,5 @@ else
   # Append the parameter to GRUB_CMDLINE_LINUX_DEFAULT
   execute_fix "s/^\(${GRUB_CMDLINE_PARAM_NAME}=\"[^\"]*\)\"/\1 $BACKLIGHT_PARAM\"/"
 fi
+
+cleanup_logging

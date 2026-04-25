@@ -6,6 +6,9 @@ set -e
 # Overrides for testability
 AUTO_CONFIRM="${AUTO_CONFIRM:-0}"
 
+source "$(dirname "$0")/scripts/utils.sh"
+setup_logging
+
 # Check if the script is run with root/sudo privileges
 if [ "$EUID" -ne 0 ]; then
   echo "Error: Please run as root"
@@ -37,6 +40,7 @@ if [[ "$(hostname)" != "archiso" ]]; then
   echo "If you have already chrooted into the installation, DO NOT run this script here."
   if ! get_confirmation "Are you sure you want to proceed?"; then
     echo "Operation cancelled."
+    cleanup_logging
     exit 0
   fi
 fi
@@ -47,6 +51,7 @@ df -h | grep "/mnt" || echo "/mnt doesn't seem to be explicitly listed by df, ch
 if [ ! -d "/mnt/boot" ]; then
   echo "WARNING: /mnt/boot does not exist. Please ensure your root (and boot/efi) partitions are mounted to /mnt."
   if ! get_confirmation "Proceed anyway?"; then
+    cleanup_logging
     exit 1
   fi
 fi
@@ -122,3 +127,5 @@ efibootmgr || echo "efibootmgr command failed to execute."
 
 echo ""
 echo "Post-installation configuration successfully completed!"
+
+cleanup_logging

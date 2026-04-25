@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ACTION=$1
-DISTRO=$2
+OS_FAMILY=$2
+source "$(dirname "$0")/../../utils.sh"
 
 if [ "$1" = "info" ]; then
     echo 'APP_NAME="Visual Studio Code"'
@@ -9,36 +10,36 @@ if [ "$1" = "info" ]; then
 fi
 
 if [ "$ACTION" = "uninstall" ]; then
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
         "arch" )
-            ${AUR_HELPER:-sudo pacman} -Rns --noconfirm visual-studio-code-bin
+            remove_package "$OS_FAMILY" visual-studio-code-bin
             ;;
         "debian" )
             sudo snap remove code || sudo apt-get purge -y code
             ;;
         "fedora" )
-            sudo dnf autoremove -y code
+            remove_package "$OS_FAMILY" code
             ;;
         * )
-            echo "Unsupported distribution: $DISTRO for VS Code uninstallation."
+            echo "Unsupported distribution: $OS_FAMILY for VS Code uninstallation."
             ;;
     esac
 else
-    case "$DISTRO" in
+    case "$OS_FAMILY" in
     "arch" )
-        ${AUR_HELPER:-sudo pacman} -S --noconfirm visual-studio-code-bin
+        install_package "$OS_FAMILY" visual-studio-code-bin
         ;;
     "debian" )
         # Can use snap on ubuntu
-        sudo snap install --classic code || echo "Snap not installed, please install manually"
+        sudo snap install --classic code || echo "Snap not installed or failed, please install manually"
         ;;
     "fedora" )
         sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
         sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
         sudo dnf check-update
-        sudo dnf install -y code
+        install_package "$OS_FAMILY" code
         ;;
     * )
-        echo "Unsupported distribution: $DISTRO for VS Code."
+        echo "Unsupported distribution: $OS_FAMILY for VS Code."
     esac
 fi

@@ -16,7 +16,10 @@ if [ "$ACTION" = "uninstall" ]; then
     exit 0
 fi
 
-manage_package "$ACTION" "$OS_FAMILY" ufw
+if ! manage_package "$ACTION" "$OS_FAMILY" ufw; then
+    echo -e "\e[1;31mError: Failed to install UFW. Skipping configuration.\e[0m"
+    exit 1
+fi
 
 echo "Configuring firewall..."
 sudo systemctl enable --now ufw

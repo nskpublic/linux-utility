@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+source "$(dirname "$0")/scripts/utils.sh"
+setup_logging
+
 # Detect Distribution
 if [ -f /etc/os-release ]; then
     . /etc/os-release
@@ -42,14 +45,29 @@ if [[ "$OS_FAMILY" == "arch" ]]; then
                 read -p "Would you like to install it now? [Y/n]: " install_aur
                 if [[ -z "$install_aur" || "$install_aur" == "y" || "$install_aur" == "Y" ]]; then
                     echo "Installing $AUR_HELPER from the AUR..."
-                    sudo pacman -S --needed --noconfirm base-devel git
-                    git clone "https://aur.archlinux.org/$AUR_HELPER.git" "/tmp/$AUR_HELPER-install"
-                    (cd "/tmp/$AUR_HELPER-install" && makepkg -si --noconfirm)
-                    rm -rf "/tmp/$AUR_HELPER-install"
-                    echo -e "\e[1;32m$AUR_HELPER installed successfully.\e[0m\n"
-                    break
+                    if sudo pacman -Sy --needed --noconfirm base-devel git; then
+                        rm -rf "/tmp/$AUR_HELPER-install"
+                        if git clone "https://aur.archlinux.org/$AUR_HELPER.git" "/tmp/$AUR_HELPER-install"; then
+                            if (cd "/tmp/$AUR_HELPER-install" && makepkg -si --noconfirm); then
+                                rm -rf "/tmp/$AUR_HELPER-install"
+                                echo -e "\e[1;32m$AUR_HELPER installed successfully.\e[0m\n"
+                                hash -r
+                                break
+                            else
+                                echo -e "\e[1;31mError: makepkg failed. $AUR_HELPER was not installed.\e[0m"
+                            fi
+                        else
+                            echo -e "\e[1;31mError: git clone failed. Check your internet connection.\e[0m"
+                        fi
+                        rm -rf "/tmp/$AUR_HELPER-install"
+                    else
+                        echo -e "\e[1;31mError: Failed to install base-devel and git via pacman.\e[0m"
+                    fi
+                    echo -e "\e[1;33mRetrying package manager selection...\e[0m\n"
+                    AUR_HELPER="sudo pacman"
                 else
-                    echo -e "\e[1;31mWarning: You chose $AUR_HELPER but opted out of installing it. Please select an AUR helper or select default by pressing enter.\e[0m\n"
+                    echo -e "\e[1;31mWarning: You chose $AUR_HELPER but opted out of installing it. Please select an AUR helper or press enter for default (pacman).\e[0m\n"
+                    AUR_HELPER="sudo pacman"
                 fi
             else
                 echo -e "\e[1;32m$AUR_HELPER is already installed.\e[0m\n"
@@ -99,7 +117,15 @@ for i in "${!app_names[@]}"; do
 done
 
 # Hand off control to the multi-select TUI menu
+pause_logging
 source "$(dirname "$0")/tui/menu.sh"
+resume_logging
+
+# Log the final selection state once
+echo -e "\n\e[1;36mFinal Application Selection:\e[0m"
+current_idx=-1 # Hide cursor highlight for the log snapshot
+draw_menu
+echo -e "---------------------------------------------------\n"
 
 # Display chosen packages and await final confirmation
 source "$(dirname "$0")/tui/summary.sh"
@@ -135,3 +161,5 @@ for i in "${!install_scripts[@]}"; do
 done
 
 echo -e "\n\e[1;32mInstallation Process Completed!\e[0m"
+
+cleanup_logging
