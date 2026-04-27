@@ -1,0 +1,26 @@
+{
+  "ghostty": {
+    "name": "Ghostty Config",
+    "dest": "~/.config/ghostty",
+    "type": "dir",
+    "file": "ghostty"
+  },
+  "nvim": {
+    "name": "Neovim Config",
+    "dest": "~/.config/nvim",
+    "type": "dir",
+    "file": "nvim"
+  },
+  "cmd_alias": {
+    "name": "Command Alias",
+    "dest": "~/.cmd_alias",
+    "type": "file",
+    "file": ".cmd_alias"
+  },
+  "zshrc": {
+    "name": "Zsh Configuration",
+    "dest": "~/.zshrc",
+    "type": "file",
+    "file": ".zshrc"
+  }
+}

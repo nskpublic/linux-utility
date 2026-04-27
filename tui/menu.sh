@@ -19,8 +19,13 @@ tput smcup # Switch to alternate screen
 tput civis # Hide cursor
 
 draw_menu() {
-    echo -e "\e[1;36mAvailable Applications:\e[0m\n"
+    echo -e "\e[1;36m${MENU_TITLE:-Available Applications}:\e[0m\n"
+    local last_cat=""
     for i in "${!app_names[@]}"; do
+        if [[ -n "${app_categories[$i]}" && "${app_categories[$i]}" != "$last_cat" ]]; then
+            echo -e "\n  \e[1;35m--- ${app_categories[$i]} ---\e[0m"
+            last_cat="${app_categories[$i]}"
+        fi
         local state=${selected_flags[$i]}
         local display_name="${app_names[$i]}"
         if ${app_installed_status[$i]}; then
