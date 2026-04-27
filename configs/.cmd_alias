@@ -1,0 +1,5 @@
+alias cat='bat'
+alias vi='nvim'
+alias vim='nvim'
+alias clear='clear -x'
+alias clear-all='clear'
