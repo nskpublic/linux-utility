@@ -11,7 +11,7 @@ if [ "$1" = "install" ]; then
     # Install walker and elephant
     echo "Installing Walker and Elephant..."
     # We use both walker and elephant. On Arch these are often AUR packages.
-    install_package "$2" walker elephant
+    install_package "$2" walker elephant-all
     
     # Post-installation steps for elephant
     if command -v elephant &> /dev/null; then
@@ -88,5 +88,5 @@ elif [ "$1" = "uninstall" ]; then
     systemctl --user disable --now walker.service
     systemctl --user disable --now elephant.service
     rm -f "$HOME/.config/systemd/user/walker.service"
-    remove_package "$2" walker elephant
+    remove_package "$2" walker elephant-all
 fi
